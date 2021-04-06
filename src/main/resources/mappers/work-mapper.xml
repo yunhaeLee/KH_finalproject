@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="workMapper">
+	
+	<resultMap id="workResultSet" type="Work"><!-- 오른쪽은 vo에서  -->
+		<id column="WORK_NO" property="workNo"/>
+		<result column="WORK_START" property="workStart"/>
+		<result column="WORK_END" property="workEnd"/>
+		<result column="WORK_STACK" property="workStack"/>
+		<result column="WORK_EXCEED" property="workExceed"/>
+		<result column="WORK_REMAIN" property="workRemain"/>
+		<result column="WORK_DATE" property="workDate"/>
+		<result column="STATUS" property="status"/>
+		<result column="EMP_NO" property="empNo"/>
+		<result column="WORK_SUM" property="workSum"/>
+		<result column="WORK_DAY_RESET" property="workDayReset"/>
+		<result column="WORK_DAY" property="workDay"/>
+		<result column="WORK_REMAIN_TOTAL" property="workRemainTotal"/>
+		<result column="WORK_START_MIN" property="workStartMin"/>
+		<result column="WORK_END_MIN" property="workEndMin"/>
+	</resultMap>
+	
+	
+	<select id="selectListCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM WORK
+		WHERE STATUS='Y'
+	
+	</select>
+	<select id="selectList" resultMap="workResultSet">
+		SELECT *
+		FROM WORK
+		WHERE STATUS = 'Y' AND EMP_NO=#{empNo}
+		ORDER BY WORK_NO DESC
+	
+	</select>
+	
+	<select id="selectUser" parameterType="string" resultMap="workResultSet">
+		SELECT * 
+ 		FROM (SELECT *FROM WORK WHERE EMP_NO=#{empNo} ORDER BY WORK_NO DESC)
+ 		WHERE ROWNUM=1
+	</select>
+	
+	<!-- ㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁ -->
+	
+	
+	
+	<select id="selectWork" parameterType="Work" resultMap="workResultSet">
+		<!-- WORK_STACK, WORK_EXCEED, WORK_REMAIN -->
+		SELECT * 
+ 		FROM (SELECT *FROM WORK WHERE EMP_NO=#{empNo} ORDER BY WORK_NO DESC)
+ 		WHERE ROWNUM=1
+		<!--
+		INSERT INTO ADDRESS
+		VALUES(SEQ_WORK_NO.NEXTVAL, #{workStart}, null, #{addressEmail}, #{addressComName}, #{addressJob}, SYSDATE,
+		default,#{empNo})
+		-->
+	
+	</select>
+	
+	
+	
+	<insert id="startWork" parameterType="Work">
+		
+
+		INSERT INTO WORK
+		VALUES(SEQ_WORK_NO.NEXTVAL,
+		SYSDATE,
+		NULL,
+		
+		
+		<!-- workDayReset  중요할때 바꾸기!!!!!!!!!!-->
+		<!--
+		<choose>
+   			<when test='workDay == "월"'>
+   				#{workStack},
+				#{workExceed},
+				#{workRemain},
+   			</when>
+   			<otherwise>
+				DEFAULT,
+   				DEFAULT,
+   				DEFAULT,
+   			</otherwise>
+   		</choose>
+		-->
+		<!--
+		<choose>
+   			<when test=' empty workStack'>
+   				DEFAULT,
+   				DEFAULT,
+   				DEFAULT,
+   			</when>
+   			<otherwise>
+				#{workStack},
+				#{workExceed},
+				#{workRemain},
+   			</otherwise>
+   		</choose>
+   		-->
+		<!--
+   		#{workStack},
+		#{workExceed},
+		#{workRemain},
+		아래꺼 지워라-->
+		
+   		DEFAULT,
+   		DEFAULT,
+   		DEFAULT,
+		
+		SYSDATE,
+		default,
+		#{empNo},
+		0,
+		default,
+		to_char(SYSDATE, 'dy'),
+		0,
+		0,
+		0
+		)
+
+	
+	</insert>
+	
+	<!-- 신규 매퍼 -->
+	<update id="updateWorkDay" parameterType="Work"><!-- 날짜 초기화 -->
+		UPDATE WORK
+		
+		<choose>
+   			<when test='workDay == "월"'>
+				SET WORK_STACK = default,
+    			WORK_EXCEED= default,
+    			WORK_REMAIN= default
+   			</when>
+   			<otherwise>
+    			SET WORK_STACK = #{workStack},
+    			WORK_EXCEED= #{workExceed},
+    			WORK_REMAIN= #{workRemain}
+   			</otherwise>
+   		</choose> 
+   		 
+   		
+   			
+    	WHERE EMP_NO=#{empNo} AND TO_CHAR(WORK_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')
+	</update>
+	
+	
+	
+	
+	<update id="startWorkMin" parameterType="Work">
+		UPDATE WORK
+    	SET WORK_START_MIN = ROUND((WORK_START-TRUNC(SYSDATE,'dd'))*24*60)+1
+    	WHERE EMP_NO=#{empNo} AND TO_CHAR(WORK_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')
+	</update>
+	
+	<!--
+	<update id="startWorkLast" parameterType="Work">
+		UPDATE WORK
+    	SET
+    		WORK_STACK=#{workStack},
+    		WORK_EXCEED=#{workExceed},
+    		WORK_REMAIN=#{workRemain}
+    	
+    	WHERE EMP_NO=#{empNo} AND TO_CHAR(#{workDate},'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')
+	</update>
+	-->
+	<!-- FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF -->
+	
+	
+	
+	
+	
+	
+	
+	<update id="endWork1" parameterType="Work">
+		
+		<!-- ibatis 조심   연속으로할때 ;제외해야하나?-->
+		UPDATE WORK
+    	SET WORK_END =SYSDATE
+    	WHERE EMP_NO=#{empNo} AND TO_CHAR(WORK_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')
+    </update>
+    
+    <update id="endWork2" parameterType="Work">
+    
+    	UPDATE WORK
+    	SET WORK_SUM= ROUND((WORK_END - WORK_START)*24*60)+1
+    	WHERE EMP_NO=#{empNo} AND TO_CHAR(WORK_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')
+    	
+		
+	</update>
+	<update id="endWork3" parameterType="Work">
+    	UPDATE WORK
+    	SET WORK_REMAIN_TOTAL= WORK_REMAIN-WORK_SUM
+    	WHERE EMP_NO=#{empNo} AND TO_CHAR(WORK_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')
+		
+	</update>
+	
+	<update id="endWork4" parameterType="Work" ><!-- IF WORK_DAY_RESET = to_char(WORK_START, 'dy') THEN 월요일 감별 -->
+		UPDATE WORK 
+   		SET WORK_STACK = WORK_STACK+WORK_SUM,
+   		
+   		
+   		<choose>
+        <when test='workRemain!=0'>
+        	<choose>
+            	<when test='workRemainTotal>0'>
+                	WORK_REMAIN = WORK_REMAIN - WORK_SUM
+            	</when>
+            	<otherwise>
+                	WORK_EXCEED = ABS(WORK_REMAIN_TOTAL),
+	                WORK_REMAIN = 0
+            	</otherwise>
+            </choose>
+        </when>
+        <otherwise>
+        	WORK_EXCEED = WORK_EXCEED + WORK_SUM
+        </otherwise>
+        </choose>
+    	WHERE EMP_NO=#{empNo} AND TO_CHAR(WORK_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')
+
+	</update>
+	
+	<update id="endWorkMin" parameterType="Work">
+		UPDATE WORK
+    	SET WORK_END_MIN = ROUND((WORK_END-TRUNC(SYSDATE,'dd'))*24*60)+1
+    	WHERE EMP_NO=#{empNo} AND TO_CHAR(WORK_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')
+	</update>
+
+	<!-- #{workStack}, #{workExceed}, #{workRemain},#{workRemainTotal>0} -->
+
+
+	<!-- 
+	<when test="WORK_REMAIN-WORK_SUM < 0">
+	<choose>
+
+	<when test = "조건">//조건1
+		위에 조건이 맞을시 실행할 구문
+	</when>
+
+
+	<otherwise>
+		조건1이 틀릴경우 실행할 구문
+	</otherwise>
+
+	</choose>
+	 -->
+	
+	
+</mapper>

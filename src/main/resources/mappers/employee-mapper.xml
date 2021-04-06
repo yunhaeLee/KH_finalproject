@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="employeeMapper">
+
+
+  	<resultMap type="Employee" id="employeeResultSet">
+
+		<id property="empNo" column="EMP_NO" />
+		<result property="empPwd" column="EMP_PWD" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="phone" column="PHONE" />
+		<result property="address" column="ADDRESS" />
+		<result property="officePhone" column="OFFICE_PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="resNo" column="RES_NO" />
+		<result property="joinDate" column="JOIN_DATE" />
+		<result property="entDate" column="ENT_DATE" />
+		<result property="originName" column="ORIGIN_NAME" />
+		<result property="changeName" column="CHANGE_NAME" />
+	    <result property="status" column="STATUS" />
+	    <result property="deptCode" column="DEPT_CODE" />
+	    <result property="jobCode" column="JOB_CODE" />
+	    <result property="deptName" column="DEPT_NAME" />
+	    <result property="empPosition" column="JOB_NAME" />
+	    <result property="deptCode" column="DEPT_CODE" />
+	    <result property="jobCode" column="JOB_CODE" />
+  	</resultMap>
+  	
+	
+  	<resultMap type="Job" id="jobResultSet">
+		<id property="jobCode" column="JOB_CODE" />
+		<result property="jobName" column="JOB_NAME" />
+	</resultMap>
+
+
+<!-- * <insert>, <update>, <delete> 태그: 해당태그들은설정이동일 -->
+  <select id="loginEmployee" parameterType="Employee" resultMap="employeeResultSet">
+  <!--암호화전   -->
+  SELECT* 
+  FROM EMPLOYEE 
+  JOIN DEPT USING (DEPT_CODE)
+  JOIN JOB USING (JOB_CODE)
+  WHERE EMP_NO=#{empNo}
+  AND EMP_PWD=#{empPwd}
+  AND STATUS='Y'
+</select>
+
+  <select id="loginEncEmployee" parameterType="Employee" resultMap="employeeResultSet">
+  <!--암호화후   -->
+SELECT* 
+  FROM EMPLOYEE 
+  JOIN DEPT USING (DEPT_CODE)
+  JOIN JOB USING (JOB_CODE)
+  WHERE EMP_NO=#{empNo}
+  AND STATUS='Y'
+</select>
+
+<update id="resetPwd" parameterType="Employee">
+   UPDATE EMPLOYEE
+   SET EMP_PWD=#{empNo}
+   WHERE EMP_NO=#{empNo}
+   AND EMAIL=#{email}
+</update>
+
+
+<update id="updateMypage" parameterType="Employee">
+	UPDATE EMPLOYEE
+	SET 
+	PHONE = #{phone},
+	EMAIL = #{email},
+	ADDRESS = #{address},
+	ORIGIN_NAME=#{originName},
+	CHANGE_NAME=#{changeName}
+	WHERE EMP_NO = #{empNo}
+</update>
+
+<select id="selectJobList" resultMap="jobResultSet">
+	SELECT *
+	FROM JOB
+</select>
+
+<select id="selectEmpList" resultMap="employeeResultSet">
+	SELECT EMP_NO, EMP_NAME, DEPT_NAME, JOB_NAME, STATUS, CHANGE_NAME
+	FROM EMPLOYEE LEFT JOIN DEPT USING(DEPT_CODE) JOIN JOB USING(JOB_CODE)
+</select>
+
+<select id="selectEmployee" parameterType="string" resultMap="employeeResultSet">
+	SELECT *
+	FROM EMPLOYEE LEFT JOIN DEPT USING(DEPT_CODE) JOIN JOB USING(JOB_CODE)
+	WHERE EMP_NO=#{empNo}
+</select>
+
+<update id="updateEmployee" parameterType="Employee">
+	UPDATE EMPLOYEE
+	SET EMP_NAME = #{empName},
+	PHONE = #{phone},
+	EMAIL = #{email},
+	ADDRESS = #{address},
+	DEPT_CODE=#{deptCode},
+	JOB_CODE=#{jobCode}
+	WHERE EMP_NO = #{empNo}
+</update>
+
+<update id="updateEntDate" parameterType="Employee">
+	UPDATE EMPLOYEE
+	SET ENT_DATE=#{entDate},
+	STATUS='N'
+	WHERE EMP_NO = #{empNo}
+</update>
+  
+	<select id="selectEmpCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM EMPLOYEE
+	</select>
+
+
+<insert id="insertEmployee">
+	INSERT INTO EMPLOYEE VALUES(
+		#{empNo},
+		#{empPwd},
+		#{empName},
+		#{phone},
+		#{address},
+		#{officePhone},
+		#{email},
+		#{resNo},
+		#{joinDate},
+		NULL,
+		NULL,
+		NULL,
+		DEFAULT,
+		#{jobCode},
+		#{deptCode})
+</insert>
+
+	<update id="updatePwEmp" parameterType="Employee">
+		UPDATE EMPLOYEE 
+		SET 
+        EMP_PWD=#{empPwd}
+        WHERE EMP_NO=#{empNo} 
+  </update>
+  
+  
+<!-- 메신저용 사원 리스트 -->
+
+<select id="msgEmpList" resultMap="employeeResultSet">
+	SELECT EMP_NO, EMP_NAME, DEPT_NAME, JOB_NAME, STATUS, CHANGE_NAME
+	FROM EMPLOYEE LEFT JOIN DEPT USING(DEPT_CODE) JOIN JOB USING(JOB_CODE)
+	WHERE EMP_NO!=#{empNo}
+	AND STATUS='Y'
+	ORDER BY DEPT_CODE DESC
+</select>
+
+  
+</mapper>

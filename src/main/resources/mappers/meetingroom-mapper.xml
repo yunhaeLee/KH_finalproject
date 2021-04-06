@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="meetingMapper">
+
+	<resultMap type="MRoom" id="roomResultSet">
+		<id property="roomNo" column="ROOM_NO" />
+		<result property="roomName" column="ROOM_NAME" />
+		<result property="limitCount" column="LIMIT_NUM" />
+		<result property="location" column="LOCATION" />
+		<result property="closureDate" column="CLOSURE_DATE" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+	
+	<resultMap type="Reservation" id="resResultSet">
+		<id property="resNo" column="RES_NO" />
+		<result property="resDate" column="RES_DATE" />
+		<result property="staTime" column="STA_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="resTitle" column="RES_TITLE" />
+		<result property="resContent" column="RES_CONTENT" />
+		<result property="roomNo" column="ROOM_NO" />
+		<result property="roomName" column="ROOM_NAME" />
+		<result property="location" column="LOCATION" />
+		<result property="empNo" column="EMP_NO" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+	
+	<select id="selectAllRoomList" resultMap="roomResultSet">
+		SELECT * 
+		FROM ROOM
+	</select>
+	
+	<insert id="insertRoom" parameterType="MRoom">
+		INSERT INTO ROOM VALUES (
+		SEQ_ROOM.NEXTVAL,
+		#{roomName},
+		#{limitCount},
+		DEFAULT,
+		#{location},
+		NULL
+		)
+	</insert>
+	
+	<update id="updateRoom" parameterType="MRoom">
+		UPDATE ROOM
+		SET ROOM_NAME =#{roomName},
+			LIMIT_NUM =#{limitCount},
+			LOCATION =#{location},
+			STATUS =#{status}
+		WHERE ROOM_NO = #{roomNo}
+	</update>
+	
+	<update id="deleteRoom" parameterType="_int">
+		UPDATE ROOM
+		SET STATUS ='N',
+			CLOSURE_DATE = SYSDATE
+		WHERE ROOM_NO = #{roomNo}
+	</update>
+	
+	<select id="selectRoomList" resultMap="roomResultSet">
+		SELECT *
+		FROM ROOM
+		WHERE STATUS = 'Y'
+	</select>
+	
+	<select id="selectMyReservation" parameterType="string" resultMap="resResultSet">
+		SELECT A.*,B.ROOM_NAME,B.LOCATION
+		FROM ROOM_RES A JOIN ROOM B ON (A.ROOM_NO=B.ROOM_NO)
+        WHERE A.STATUS = 'Y'
+		AND EMP_NO = #{empNo}
+		ORDER BY RES_DATE ASC
+	</select>
+	
+	<select id="selectDateReservation" parameterType="Reservation" resultMap="resResultSet">
+		SELECT STA_TIME, END_TIME
+		FROM ROOM_RES
+		WHERE STATUS = 'Y'
+		AND RES_DATE = #{resDate}
+		AND ROOM_NO = #{roomNo}
+	</select>
+	
+	<insert id="insertReservation" parameterType="Reservation">
+		INSERT INTO ROOM_RES
+		VALUES(
+		SEQ_RES.NEXTVAL,
+		#{resDate},
+		#{staTime},	
+		#{endTime},	
+		#{resTitle},	
+		#{resContent},	
+		#{roomNo},	
+		#{empNo},
+		DEFAULT	
+		)
+	</insert>
+	
+	<delete id="deleteReservation" parameterType="string">
+		DELETE FROM ROOM_RES
+		WHERE RES_NO = #{res_no}
+	</delete>
+	
+	<update id="checkReservation" parameterType="date">
+		<![CDATA[
+		UPDATE ROOM_RES
+		SET STATUS = 'N'
+		WHERE RES_DATE < #{time}
+		]]>
+	</update>
+	
+	<select id="selectReservation" parameterType="string" resultMap="resResultSet">
+		SELECT A.*,B.ROOM_NAME,C.EMP_NAME
+		FROM ROOM_RES A JOIN ROOM B ON (A.ROOM_NO=B.ROOM_NO)
+        JOIN EMPLOYEE C ON (A.EMP_NO = C.EMP_NO)
+        WHERE A.STATUS = #{status}
+		ORDER BY RES_DATE ASC
+	</select>
+</mapper>

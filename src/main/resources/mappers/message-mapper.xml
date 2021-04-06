@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="messageMapper">
+
+	<resultMap id="MessageResultSet" type="Message">
+		<id property="msgNo" column="MSG_NO"/>
+		<result property="chatNo" column="CHAT_NO"/>
+		<result property="msgSender" column="MSG_SENDER"/>
+		<result property="msgContent" column="MSG_CONTENT"/>
+		<result property="msgDate" column="MSG_DATE"/>
+		<result property="msgReadStatus" column="MSG_READ_STATUS"/>
+		<result property="msgReceiver" column="MSG_RECEIVER"/>
+		<result property="empName" column="EMP_NAME"/>
+		<result property="empPosition" column="JOB_NAME"/>
+		<result property="deptName" column="DEPT_NAME"/>
+		<result property="profile" column="CHANGE_NAME"/>
+	</resultMap>
+
+	<insert id="insertMessage" parameterType="Message">
+		INSERT INTO MESSAGE_MSG
+		VALUES(SEQ_MSG.NEXTVAL,#{chatNo},#{msgSender},#{msgContent},SYSDATE,
+		DEFAULT,#{msgReceiver})
+	</insert>
+	
+	
+	<insert id="insertMsg" parameterType="Message">
+		INSERT INTO MESSAGE_MSG
+		VALUES(SEQ_MSG.NEXTVAL,#{chatNo},#{msgSender},#{msgContent},SYSDATE,
+		DEFAULT,#{msgReceiver})
+	</insert>
+	
+	<select id="selectMsgList" resultMap="MessageResultSet">
+	  SELECT A.MSG_NO, A.CHAT_NO, A.MSG_CONTENT, A.MSG_SENDER, A.MSG_RECEIVER, A.MSG_DATE, B.EMP_NAME, B.CHANGE_NAME
+	  FROM MESSAGE_MSG A LEFT JOIN EMPLOYEE B ON A.MSG_SENDER=B.EMP_NO
+	  WHERE A.CHAT_NO=#{chatNo}
+	  AND A.MSG_READ_STATUS='Y'
+	  ORDER BY MSG_NO
+	</select>
+
+	
+</mapper>

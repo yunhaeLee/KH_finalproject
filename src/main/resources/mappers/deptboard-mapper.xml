@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="deptboardMapper">
+
+	<resultMap id="DeptboardResultSet" type="Deptboard">
+		<id property="dboardNo" column="DBOARD_NO"/>
+		<result property="dboardWriter" column="DBOARD_WRITER"/>
+		<result property="dboardWriterName" column="EMP_NAME"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="dboardCategory" column="DBOARD_CATEGORY"/>
+		<result property="dboardTitle" column="DBOARD_TITLE"/>
+		<result property="dboardContent" column="DBOARD_CONTENT"/>
+		<result property="dboardDate" column="DBOARD_DATE"/>
+		<result property="status" column="STATUS"/>
+		<result property="count" column="COUNT"/>
+		<result property="profile" column="CHANGE_NAME"/>
+		<result property="replyCount" column="REPLY_COUNT"/>
+	</resultMap>
+	
+	<resultMap id="replyResultSet" type="Reply">
+		<id property="replyNo" column="REPLY_NO" />
+		<result property="replyWriter" column="REPLY_WRITER"/>
+		<result property="replyWriterName" column="EMP_NAME"/>
+		<result property="replyContent" column="REPLY_CONTENT" />
+		<result property="refBoardNo" column="REF_BNO" />
+		<result property="replyDate" column="REPLY_DATE"/>
+		<result property="status" column="STATUS"/>
+	</resultMap>
+	
+	<select id="selectDListCount" parameterType="string" resultType="_int">
+		SELECT COUNT(*)
+		FROM DEPTBOARD
+		WHERE DEPT_CODE=#{deptCode}
+		AND STATUS='Y'
+	</select>
+	
+	<select id="selectDList" parameterType="string" resultMap="DeptboardResultSet">
+		SELECT A.*,NVL((SELECT COUNT(*) FROM REPLY
+		WHERE REF_BNO = A.DBOARD_NO AND STATUS='Y'
+		GROUP BY DBOARD_NO),0) REPLY_COUNT, EMP_NAME
+		FROM DEPTBOARD A LEFT JOIN EMPLOYEE ON DBOARD_WRITER=EMP_NO
+		WHERE a.dept_code = #{deptCode}
+      	AND A.STATUS = 'Y'
+      	ORDER BY DBOARD_NO DESC
+	</select>
+
+	<insert id="insertDboard" parameterType="Deptboard">
+		INSERT INTO DEPTBOARD
+		VALUES(SEQ_BNO.NEXTVAL, #{dboardWriter}, #{deptCode}, #{dboardCategory}, #{dboardTitle}, #{dboardContent},
+		SYSDATE, DEFAULT, DEFAULT)
+	</insert>
+	
+	<update id="deleteDboard" parameterType="_int">
+		UPDATE DEPTBOARD
+		SET STATUS='N'
+		WHERE DBOARD_NO=#{dboardNo}
+	</update>
+	
+	<update id="updateDboard" parameterType="Deptboard">
+		UPDATE DEPTBOARD
+		SET DBOARD_CATEGORY=#{dboardCategory},
+			DBOARD_CONTENT=#{dboardContent},
+			DBOARD_TITLE=#{dboardTitle}
+		WHERE DBOARD_NO=#{dboardNo}
+	</update>
+	
+	<update id="updateIncreaseCount" parameterType="_int">
+		UPDATE DEPTBOARD
+		SET COUNT=COUNT+1
+		WHERE DBOARD_NO=#{dboardNo}
+	</update>
+	
+	<select id="selectDboard" resultMap="DeptboardResultSet">
+		SELECT A.*, B.EMP_NAME, B.CHANGE_NAME 
+		FROM DEPTBOARD A INNER JOIN EMPLOYEE B ON A.DBOARD_WRITER=B.EMP_NO
+		WHERE A.DBOARD_NO=#{dboardNo}
+		AND A.STATUS='Y'
+	</select>
+	
+	<insert id="insertReply" parameterType="Reply">
+		INSERT INTO REPLY
+		VALUES(SEQ_RNO.NEXTVAL, #{replyWriter}, #{refBoardNo}, #{replyContent}, SYSDATE, DEFAULT)
+	</insert>
+	
+	<select id="selectReplyList" resultMap="replyResultSet">
+		SELECT REPLY_NO, EMP_NAME, REPLY_CONTENT, REPLY_DATE
+		FROM REPLY A LEFT JOIN EMPLOYEE ON REPLY_WRITER=EMP_NO
+		WHERE REF_BNO=#{dboardNo}
+		AND A.STATUS='Y'
+		ORDER BY REPLY_NO
+	</select>
+	
+	<select id="selectSearchList" resultType="Deptboard" parameterType="map">
+		SELECT *
+		FROM DEPTBOARD
+		WHERE STATUS='Y'
+		AND (
+		DBOARD_TITLE LIKE #{searchKey}
+		or DBOARD_CONTENT LIKE #{searchKey}
+		)
+	</select>
+	
+	
+</mapper>

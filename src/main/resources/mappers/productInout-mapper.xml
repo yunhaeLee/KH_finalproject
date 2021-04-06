@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="proInoutMapper">
+
+<resultMap type="Client" id="clientResultSet">
+	<id property="cliNo" column="CLI_NO"/>
+	<result property="cliName" column="CLI_NAME"/>
+	<result property="corporateNo" column="CORPORATE_NO"/>
+	<result property="address" column="ADDRESS"/>
+	<result property="master" column="MASTER"/>
+	<result property="phone" column="PHONE"/>
+	<result property="comment" column="COMMENT"/>
+	<result property="sortation" column="SORTATION"/>
+	<result property="status" column="STATUS"/>
+</resultMap>
+
+<resultMap type="Product" id="ProductResultSet">
+	<id property="proNo" column="PRO_NO"/>
+	<result property="proName" column="PRO_NAME"/>
+	<result property="inStock" column="IN_STOCK"/>
+	<result property="inPrice" column="IN_PRICE"/>
+	<result property="outStock" column="OUT_STOCK"/>
+	<result property="outPrice" column="OUT_PRICE"/>
+	<result property="stock" column="STOCK"/>
+	<result property="comment" column="COMMENT"/>
+	<result property="cliNo" column="CLI_NO"/>
+	<result property="cliName" column="CLI_NAME"/>
+</resultMap>
+
+<resultMap type="Inout" id="InoutResultSet">
+	<id property="inoutNo" column="INOUT_NO"/>
+	<result property="sortation" column="SORTATION"/>
+	<result property="quantity" column="QUANTITY"/>
+	<result property="price" column="PRICE"/>
+	<result property="inoutDate" column="INOUT_DATE"/>
+	<result property="proNo" column="PRO_NO"/>
+	<result property="cliNo" column="CLI_NO"/>
+	<result property="cliName" column="CLI_NAME"/>
+	<result property="proName" column="PRO_NAME"/>
+	<result property="status" column="STATUS"/>
+</resultMap>
+
+<select id="selectClientList" resultMap="clientResultSet">
+	SELECT *
+	FROM CLIENT
+</select>
+
+<insert id="insertClient" >
+	INSERT INTO CLIENT VALUES(
+		#{cliNo},
+		#{cliName},
+		#{corporateNo},
+		#{address},
+		#{master},
+		#{phone},
+		#{sortation},
+		#{comment}) 
+</insert>
+
+<select id="selectClient" parameterType="string" resultMap="clientResultSet">
+	SELECT *
+	FROM CLIENT
+	WHERE CLI_NO = #{cliNo}
+</select>
+
+<update id="updateClient" parameterType="Client">
+	UPDATE CLIENT
+	SET 
+	CLI_NAME= #{cliName},
+	CORPORATE_NO= #{corporateNo},
+	ADDRESS= #{address},
+	"MASTER"= #{master},
+	PHONE= #{phone},
+	SORTATION= #{sortation},
+	"COMMENT"= #{comment}
+	WHERE CLI_NO = #{cliNo}
+</update>
+
+<delete id="deleteClient" parameterType="string">
+	DELETE FROM CLIENT
+	WHERE CLI_NO = #{cliNo}
+</delete>
+
+<select id="checkClientNo" parameterType="string" resultType="_int">
+	SELECT COUNT(*)
+	FROM CLIENT
+	WHERE CLI_NO = #{code}
+</select>
+
+<select id="selectProductList" parameterType="map" resultMap="ProductResultSet">
+	SELECT *
+	FROM PRODUCT
+	<if test="cliNo != null">
+	WHERE CLI_NO = #{cliNo}
+	</if>
+</select>
+
+<select id="selectProduct" parameterType="string" resultMap="ProductResultSet">
+	SELECT *
+	FROM PRODUCT JOIN CLIENT USING (CLI_NO)
+	WHERE PRO_NO = #{proNo}
+</select>
+
+<select id="checkProductNo" parameterType="string" resultType="_int">
+	SELECT COUNT(*)
+	FROM PRODUCT
+	WHERE PRO_NO = #{code}
+</select>
+
+<insert id="insertProduct">
+	INSERT INTO PRODUCT VALUES(
+		#{proNo},
+		#{proName},
+		DEFAULT,
+		#{inPrice},
+		DEFAULT,
+		#{outPrice},
+		DEFAULT,
+		#{comment},
+		#{cliNo}) 
+</insert>
+
+<select id="selectProductCount" parameterType="string" resultType="_int">
+	SELECT COUNT(*)
+	FROM PRODUCT
+	WHERE CLI_NO = #{cliNo}
+</select>
+
+<update id="updateProduct" parameterType="Product">
+	UPDATE PRODUCT
+	<set> PRO_NAME = #{proName},
+		IN_PRICE = #{inPrice},
+		OUT_PRICE = #{outPrice},
+		<if test="inStock != null">
+			IN_STOCK = #{inStock},
+		</if>
+		<if test="outStock != null">
+			OUT_STOCK = #{outStock},
+		</if>
+		<if test="stock != null">
+			STOCK = #{stock},
+		</if>
+		"COMMENT" = #{comment}
+	</set>
+	WHERE PRO_NO = #{proNo}
+</update>
+
+<delete id="deleteProduct" parameterType="string">
+	DELETE FROM PRODUCT
+	WHERE PRO_NO = #{proNo}
+</delete>
+
+<delete id="deleteAllProduct" parameterType="map">
+	DELETE FROM PRODUCT
+	<if test="cliNo != null">
+	WHERE CLI_NO = #{cliNo}
+	</if>
+</delete>
+
+<select id="selectInoutList" parameterType="map" resultMap="InoutResultSet">
+	SELECT A.*,C.CLI_NAME, B.PRO_NAME
+	FROM INOUT A LEFT JOIN PRODUCT B ON(A.PRO_NO=B.PRO_NO)
+	LEFT JOIN CLIENT C ON(B.CLI_NO=C.CLI_NO)
+	<trim prefix="WHERE" prefixOverrides="AND">
+		<if test="proNo != null">
+			A.PRO_NO = #{proNo}
+		</if>
+		<if test="cliNo != null">
+			AND B.CLI_NO = #{cliNo}
+		</if>
+	</trim>
+</select>
+
+<select id="selectInoutCount" resultType="_int">
+	SELECT COUNT(*)
+	FROM INOUT
+</select>
+
+<insert id="insertInout" parameterType="Inout">
+	INSERT INTO
+	INOUT VALUES(
+		#{inoutNo},
+		#{sortation},
+		#{quantity},
+		#{price},
+		#{inoutDate},
+		#{comment},
+		#{cliNo},
+		#{proNo},
+		DEFAULT)
+</insert>
+
+<select id="selectInout" parameterType="string" resultMap="InoutResultSet">
+	SELECT *
+	FROM INOUT
+	WHERE INOUT_NO = #{inoutNo}
+</select>
+
+<update id="deleteInout" parameterType="string">
+	UPDATE INOUT
+	SET
+	STATUS='N'
+	WHERE INOUT_NO = #{inoutNo}
+</update>
+</mapper>

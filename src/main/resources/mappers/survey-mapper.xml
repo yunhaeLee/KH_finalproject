@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="surveyMapper">
+
+	
+	<resultMap id="SurveyResultSet" type="Survey">
+		<id property="surNo" column="SUR_NO"/>
+		<result property="surWriter" column="SUR_WRITER"/>
+		<result property="surTitle" column="SUR_TITLE"/>
+		<result property="surContent" column="SUR_CONTENT"/>
+		<result property="surStart" column="SUR_START"/>
+		<result property="surEnd" column="SUR_END"/>
+		<result property="surDate" column="SUR_DATE"/>
+		<result property="status" column="STATUS"/>
+		<result property="surqContent" column="SURQ_CONTENT"/>
+		<result property="surqType" column="SURQ_TYPE"/>
+		<result property="surqStatus" column="SURQ_STATUS"/>
+	</resultMap>
+
+	<select id="selectListCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM SURVEY
+		WHERE STATUS='Y'
+	</select>
+	
+	<select id="selectList" resultMap="SurveyResultSet">
+		SELECT *
+		FROM SURVEY
+		WHERE STATUS='Y'
+		ORDER BY SUR_NO DESC
+	</select>
+	
+	
+	
+	
+</mapper>

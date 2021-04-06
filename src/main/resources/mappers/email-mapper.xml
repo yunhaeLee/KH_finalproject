@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="emailMapper">
+	
+	<resultMap id="emailResultSet" type="Email"><!-- 오른쪽은 vo에서  -->
+		<id column="EMAIL_NO" property="emailNo"/>
+		<result column="EMAIL_TITLE" property="emailTitle"/>
+		<result column="EMAIL_CONTENT" property="emailContent"/>
+		<result column="EMAIL_O_FILE" property="emailOFile"/>
+		<result column="EMAIL_N_FILE" property="emailNFile"/>
+		<result column="EMAIL_TIME" property="emailTime"/>
+		<result column="STATUS" property="status"/>
+		<result column="EMAIL_IMPORTANT" property="emailImportant"/>
+		<result column="EMAIL_SEND" property="empNo"/>
+		<result column="EMAIL_SEND_Email" property="emailSendEmail"/>
+		<result column="EMAIL_RECEIVE" property="emailReceive"/>
+		<result column="EMAIL_RECEIVE_Email" property="emailReceiveEmail"/>
+
+	</resultMap>
+	
+	<resultMap id="emailInfoResultSet" type="EmailInfo">
+		<id column="EMP_NO" property="empNo"/>
+		<result column="EMAIL_EMAIL" property="emailEmail"/>
+		<result column="EMAIL_ID" property="emailId"/>
+		<result column="EMAIL_PWD" property="emailPwd"/>
+		<result column="EMAIL_HOST" property="emailHost"/>
+		<result column="EMAIL_PORT" property="emailPort"/>
+	</resultMap>
+	
+	<select id="selectListCount" resultType="_int">
+	
+		SELECT COUNT(*)
+		FROM EMAIL
+		WHERE STATUS='Y'
+	
+	</select>
+	<select id="selectListCountIm" resultType="_int">
+	
+		SELECT COUNT(*)
+		FROM EMAIL
+		WHERE STATUS='Y' AND EMAIL_IMPORTANT='Y'
+	
+	</select>
+	
+	
+	<select id="selectList" resultMap="emailResultSet">
+	 
+		SELECT *
+		FROM EMAIL
+		WHERE STATUS = 'Y' AND EMAIL_SEND=#{empNo} AND EMAIL_IMPORTANT ='N'
+		ORDER BY EMAIL_NO DESC
+	
+	</select>
+	
+	
+	
+	<select id="selectListIm" resultMap="emailResultSet">
+	 
+		SELECT *
+		FROM EMAIL
+		WHERE STATUS = 'Y' AND EMAIL_SEND=#{empNo} AND EMAIL_IMPORTANT ='Y'
+		ORDER BY EMAIL_NO DESC
+	
+	</select>
+	
+	<select id="selectUser" resultMap="emailResultSet">
+		SELECT * 
+ 		FROM EMAIL
+ 		WHERE EMAIL_SEND =#{empNo}
+	</select>
+	
+	<select id="selectUserInfo" resultMap="emailInfoResultSet">
+		SELECT * 
+ 		FROM EMAIL_INFO
+ 		WHERE EMP_NO =#{empNo}
+	</select>
+	
+	<insert id="insertEmail" parameterType="Email">
+		insert into EMAIL VALUES
+		(
+			SEQ_EMAIL_NO.NEXTVAL,
+			#{emailTitle},
+			#{emailContent},
+			null,
+			null,
+			SYSDATE,
+			'Y',
+			<!-- #{emailImportant},아래    'N'   -->
+			#{emailImportant},
+			#{empNo},
+			#{emailSendEmail},
+			
+			#{emailReceive},
+			#{emailReceiveEmail}
+		)
+	</insert>
+	
+	
+	<select id="selectEmailDetail" parameterType="_int" resultMap="emailResultSet">
+		SELECT *
+		FROM EMAIL
+		WHERE EMAIL_NO=#{emailNo}
+		and status='Y'
+	</select>
+	
+	<update id="deleteEmail" parameterType="_int">
+	
+	UPDATE EMAIL
+	SET STATUS='N'
+	WHERE EMAIL_NO=#{emailNo}
+	
+	</update>
+	
+</mapper>

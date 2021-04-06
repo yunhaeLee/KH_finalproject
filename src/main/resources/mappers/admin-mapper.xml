@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="adminMapper">
+	
+	<resultMap type="Employee" id="employeeResultSet">
+	
+		<id property="empNo" column="EMP_NO" />
+		<result property="empPwd" column="EMP_PWD" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="phone" column="PHONE" />
+		<result property="address" column="ADDRESS" />
+		<result property="officePhone" column="OFFICE_PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="resNo" column="RES_NO" />
+		<result property="joinDate" column="JOIN_DATE" />
+		<result property="entDate" column="ENT_DATE" />
+		<result property="originName" column="ORIGIN_NAME" />
+		<result property="changeName" column="CHANGE_NAME" />
+	    <result property="status" column="STATUS" />
+	    <result property="deptName" column="DEPT_NAME" />
+	    <result property="deptCode" column="DEPT_CODE" />
+	    <result property="empPosition" column="JOB_NAME" />
+	    <result property="jobCode" column="JOB_CODE" />
+	</resultMap>
+	
+	<resultMap type="Dept" id="deptResultSet">
+	
+		<id property="deptCode" column="DEPT_CODE" />
+		<result property="deptName" column="DEPT_NAME" />
+		<result property="empCount" column="EMP_COUNT" />
+		
+	</resultMap>
+	
+	<resultMap type="Authority" id="authResultSet">
+	
+		<id property="authNo" column="AUTH_NO" />
+		<result property="adminNo" column="ADMIN_NO" />
+		<result property="empNo" column="EMP_NO" />
+		<result property="empName" column="EMP_NAME" />
+	</resultMap>
+	
+	<resultMap type="AdminMenu" id="adminResultSet">
+		<id property="adminNo" column="ADMIN_NO" />
+		<result property="adminName" column="ADMIN_NAME" />
+		<result property="adminInfo" column="ADMIN_INFO" />
+	</resultMap>
+	
+	<resultMap id="CalendarResultSet" type="Calendar">
+		<id property="calNo" column="CAL_NO"/>
+		<result property="empNo" column="EMP_NO"/>
+		<result property="calCate" column="CAL_CATE"/>
+		<result property="calCateName" column="CATEGORY_TITLE"/>
+		<result property="calTitle" column="CAL_TITLE"/>
+		<result property="calContent" column="CAL_CONTENT"/>
+		<result property="calSDates" column="CAL_SDATE"/>
+		<result property="calEDates" column="CAL_EDATE"/>
+		<result property="status" column="STATUS"/>
+		<result property="calColor" column="CATEGORY_COLOR"/>
+	</resultMap>
+	
+	<select id="selectDeptList" resultMap="deptResultSet">
+		SELECT *
+		FROM DEPT
+		ORDER BY LENGTH(DEPT_CODE) ASC, DEPT_CODE ASC
+	</select>
+	
+	<select id="selectEmployeeList" resultMap="employeeResultSet">
+		SELECT EMP_NO,EMP_NAME,DEPT_CODE,JOB_NAME
+		FROM EMPLOYEE JOIN JOB USING(JOB_CODE)
+		ORDER BY LENGTH(JOB_CODE) DESC, JOB_CODE DESC
+	</select>
+	
+	<select id="selectAuthority" parameterType="string" resultType="_int">
+		SELECT COUNT(*)
+		FROM AUTHORITY
+		WHERE AUTH_NO = #{authNo}
+	</select>
+	
+	<insert id="insertAuthority" parameterType="Authority">
+		INSERT INTO AUTHORITY VALUES (#{authNo},#{adminNo},#{empNo})
+	</insert>
+	
+	<select id="selectAuthList"  resultMap="authResultSet">
+		SELECT  AUTH_NO, ADMIN_NO, EMP_NO, EMP_NAME
+		FROM AUTHORITY JOIN EMPLOYEE USING(EMP_NO)	
+	</select>
+	
+	<select id="selectAdminList"  resultMap="adminResultSet">
+		SELECT *
+		FROM ADMINMENU 	
+	</select>
+	
+	<delete id="deleteAuthority" parameterType="string">
+		DELETE FROM AUTHORITY WHERE AUTH_NO = #{authNo} 
+	</delete>
+	<!--
+	> - &gt;
+	< - &lt;
+	>= - &gt;=
+	<= - &lt;=
+ 	-->
+	<select id="deptMainList" resultMap="deptResultSet">
+	<![CDATA[
+		SELECT *
+		FROM DEPT
+		WHERE LENGTH(DEPT_CODE)<4
+	]]>
+	</select>
+	
+	<select id="deptSubList" parameterType="string" resultMap="deptResultSet">
+	<![CDATA[
+	SELECT DEPT_CODE, DEPT_NAME,NVL((SELECT COUNT(*) 
+									 FROM EMPLOYEE 
+									 WHERE DEPT_CODE= A.DEPT_CODE AND STATUS='Y' GROUP BY DEPT_CODE),0) EMP_COUNT
+	FROM DEPT A
+	WHERE LENGTH(DEPT_CODE)>3 AND DEPT_CODE LIKE '%'||#{deptCode}||'%' 
+	]]>
+	</select>
+	
+	<insert id="insertDept" parameterType="Dept">
+		INSERT INTO DEPT VALUES(#{deptCode},#{deptName})
+	</insert>
+	
+	<select id="deptEmpList" parameterType="string" resultMap="employeeResultSet">
+		SELECT EMP_NO,EMP_NAME,JOB_NAME
+		FROM EMPLOYEE JOIN JOB USING(JOB_CODE)
+		WHERE DEPT_CODE = #{deptCode} AND STATUS='Y'
+		ORDER BY LENGTH(JOB_CODE) DESC, JOB_CODE DESC
+	</select>
+	
+	<select id="selectCalendarList" resultMap="CalendarResultSet">
+		SELECT A.*, CATEGORY_TITLE
+		FROM CALENDAR A JOIN CAL_CATEGORY B ON CAL_CATE=CATEGORY_NO
+        WHERE CAL_CATE IN (30,40)
+        AND STATUS='Y'
+	</select>
+	
+	<insert id="insertCalendar" parameterType="Calendar">
+		INSERT INTO CALENDAR
+		VALUES(
+			SEQ_CAL.NEXTVAL,
+			#{empNo},
+			#{calCate},
+			#{calTitle},
+			NULL,
+			#{calSDates},
+			#{calEDates},
+			DEFAULT	
+		)
+	</insert>
+	
+	<delete id="deleteCalendar" parameterType="string">
+		DELETE
+		FROM CALENDAR
+		WHERE CAL_NO=#{calNo} 
+	</delete>
+	
+	<select id="checkAdmin" parameterType="string" resultType="string">
+		SELECT ADMIN_NO
+		FROM AUTHORITY
+		WHERE EMP_NO = #{empNo}
+	</select>
+	
+</mapper>

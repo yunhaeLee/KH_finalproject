@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="todoMapper">
+	<resultMap type="Todo" id="todoResultMap">
+
+		<id property="todoNo" column="TODO_NO" />
+		<result property="todoTitle" column="TODO_TITLE" />
+		<result property="todoInsertDate" column="TODO_INSERTDATE" />
+        <result property="todoContent" column="TODO_CONTENT" />
+		<result property="todoDoneDate" column="TODO_DONEDATE" />
+		<result property="status" column="STATUS" />
+        <result property="empNo" column="EMP_NO" />
+	</resultMap>
+	
+<insert id="insertTodo" parameterType="Todo">
+INSERT INTO TODO
+VALUES(SEQ_TNO.NEXTVAL,#{todoTitle},SYSDATE,#{todoContent},#{todoDoneDate},DEFAULT,#{empNo})
+
+</insert>
+
+<select id="selectTodo"  resultMap="todoResultMap">	
+ SELECT *
+ FROM TODO
+ WHERE EMP_NO=#{empNo}
+ ORDER BY TODO_DONEDATE ASC
+
+</select>	
+
+
+
+<select id="selectMainTodo"  resultMap="todoResultMap">	
+ SELECT *
+ FROM TODO
+ WHERE EMP_NO=#{empNo}
+ AND STATUS='T'
+ ORDER BY TODO_DONEDATE ASC
+
+</select>	
+
+<update id="deleteTodo" parameterType="Todo">
+	UPDATE 
+	TODO SET
+	SATUS ='del'
+	WHERE TODO_NO=#{todoNo}
+</update>
+
+<!--  
+<update id="updateTodo" parameterType="Todo">
+  UPDATE 
+  TODO SET 
+  STATUS ='N' 
+  WHERE TODO_NO=#{todoNo}
+
+</update>
+-->
+
+
+<update id="updateDoing" parameterType="_int">
+  UPDATE 
+  TODO SET 
+  STATUS ='N' 
+  WHERE TODO_NO=#{todoNo}
+
+</update>
+
+
+<update id="updateDone" parameterType="_int">
+  UPDATE 
+  TODO SET 
+  STATUS ='D' 
+  WHERE TODO_NO=#{todoNo}
+
+</update>
+
+<update id="updateDelete" parameterType="_int">
+  UPDATE 
+  TODO SET 
+  STATUS ='L' 
+  WHERE TODO_NO=#{todoNo}
+
+</update>
+
+<select id="selectTodoDetail"  resultMap="todoResultMap" parameterType="string">	
+ SELECT *
+ FROM TODO
+ WHERE TODO_NO=#{todoNo}
+
+</select>	
+
+<update id="updateTodo"  parameterType="Todo">
+	UPDATE 
+	TODO SET
+    TODO_TITLE=#{todoTitle},
+    TODO_DONEDATE=#{todoDoneDate},
+    TODO_CONTENT=#{todoContent}
+	WHERE TODO_NO=#{todoNo}
+
+
+</update>
+</mapper>

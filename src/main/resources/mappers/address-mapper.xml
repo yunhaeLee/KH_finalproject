@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="addressMapper">
+	
+	<resultMap id="addressResultSet" type="Address"><!-- 오른쪽은 vo에서  -->
+		<id column="ADDRESS_NO" property="addressNo"/>
+		<result column="ADDRESS_NAME" property="addressName"/>
+		<result column="ADDESS_PHONE" property="addressPhone"/>
+		<result column="ADDRESS_EMAIL" property="addressEmail"/>
+		<result column="ADDRESS_COM_NAME" property="addressComName"/>
+		<result column="ADDRESS_JOB" property="addressJob"/>
+		<result column="ADDRESS_TEL" property="addressTel"/>
+		<result column="ADDRESS_DEPT" property="addressDept"/>
+		<result column="ADDRESS_ADDRESS" property="addressAddress"/>
+		<result column="ADDRESS_MEMO" property="addressMemo"/>
+		<result column="STATUS" property="status"/>
+		<result column="EMP_NO" property="empNo"/>
+	</resultMap>
+	
+	<resultMap type="Employee" id="employeeResultSet">
+		<id property="empNo" column="EMP_NO" />
+		<result property="empPwd" column="EMP_PWD" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="phone" column="PHONE" />
+		<result property="address" column="ADDRESS" />
+		<result property="officePhone" column="OFFICE_PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="resNo" column="RES_NO" />
+		<result property="joinDate" column="JOIN_DATE" />
+		<result property="entDate" column="ENT_DATE" />
+		<result property="originName" column="ORIGIN_NAME" />
+		<result property="changeName" column="CHANGE_NAME" />
+	    <result property="status" column="STATUS" />
+	    <result property="deptCode" column="DEPT_CODE" />
+	    <result property="jobCode" column="JOB_CODE" />
+	    <result property="deptName" column="DEPT_NAME" />
+	    <result property="empPosition" column="JOB_NAME" />
+	    <result property="deptCode" column="DEPT_CODE" />
+	    <result property="jobCode" column="JOB_CODE" />
+  	</resultMap>
+	<!-- empNum ) empNo -->
+	<select id="selectListCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM ADDRESS
+		WHERE STATUS='Y'
+	
+	</select>
+	<select id="selectListCount2" resultType="_int">
+		SELECT COUNT(*)
+		FROM EMPLOYEE
+		WHERE STATUS='Y'
+		
+	
+	</select>
+	
+	<select id="selectList" resultMap="addressResultSet"><!-- 내주소 -->
+		SELECT *
+		FROM ADDRESS
+		WHERE STATUS = 'Y'
+		AND EMP_NO=#{empNo}
+		ORDER BY ADDRESS_NO DESC
+		
+	
+	</select>
+	<select id="selectList2" resultMap="employeeResultSet"><!-- 전체 -->
+		SELECT *
+		FROM EMPLOYEE
+		WHERE STATUS = 'Y'
+		ORDER BY EMP_NO DESC
+	
+	</select>
+	
+	<select id="selectAddressNum" resultMap="employeeResultSet">
+		SELECT *
+		FROM EMPLOYEE
+		WHERE STATUS = 'Y'
+		AND EMP_NO=#{empNo}
+		ORDER BY EMP_NO DESC
+	
+	</select>
+	
+	
+	
+	
+	<!--sdsd -->
+	<select id="selectAddress" parameterType="_int" resultMap="addressResultSet">
+		SELECT *
+		FROM ADDRESS
+		WHERE ADDRESS_NO=#{addressNo}
+		and status='Y'
+	</select>
+	
+	<update id="deleteAddress" parameterType="_int">
+	
+	UPDATE ADDRESS
+	SET STATUS='N'
+	WHERE ADDRESS_NO=#{addressNo}
+	
+	
+	</update>
+	
+	<insert id="insertAddress" parameterType="Address">
+	
+		INSERT INTO ADDRESS
+		VALUES(SEQ_ADDRESS_NO.NEXTVAL, #{addressName}, #{addressPhone}, #{addressEmail}, #{addressComName}, #{addressJob}, #{addressTel}, #{addressDept},#{addressAddress},
+		#{addressMemo},default,#{empNo})
+	
+	
+	</insert>
+	
+	
+	<update id="updateAddress" parameterType="Address">
+		UPDATE ADDRESS
+		SET ADDRESS_NAME=#{addressName},
+		ADDESS_PHONE=#{addressPhone},
+		ADDRESS_EMAIL=#{addressEmail} ,
+		ADDRESS_COM_NAME=#{addressComName},
+		ADDRESS_JOB=#{addressJob},
+		ADDRESS_TEL=#{addressTel} ,
+		ADDRESS_DEPT=#{addressDept},
+		ADDRESS_ADDRESS=#{addressAddress},
+		ADDRESS_MEMO=#{addressMemo}
+		
+		WHERE ADDRESS_NO=#{addressNo}
+	
+	</update>
+	
+</mapper>

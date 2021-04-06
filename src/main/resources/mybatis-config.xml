@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+	<settings><!-- value에 NULL은 무조건 대문자로 -->
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+	 <typeAliases>
+		<typeAlias type="com.kh.spring.address.model.vo.Address" alias="Address"/>
+		<typeAlias type="com.kh.spring.todo.model.vo.Todo" alias="Todo"/>
+		<typeAlias type="com.kh.spring.employee.model.vo.Employee" alias="Employee"/>
+		<typeAlias type="com.kh.spring.board.notice.model.vo.Notice" alias="Notice"/>
+		<typeAlias type="com.kh.spring.board.deptboard.model.vo.DeptBoard" alias="Deptboard"/>
+		<typeAlias type="com.kh.spring.board.community.model.vo.Community" alias="Community"/>
+		<typeAlias type="com.kh.spring.board.community.model.vo.Likes" alias="Likes"/>
+		<typeAlias type="com.kh.spring.board.common.model.vo.Reply" alias="Reply"/>
+		<typeAlias type="com.kh.spring.work.model.vo.Work" alias="Work"/>
+		<typeAlias type="com.kh.spring.admin.model.vo.Department" alias="Dept"/>
+		<typeAlias type="com.kh.spring.admin.model.vo.Job" alias="Job"/>
+		<typeAlias type="com.kh.spring.admin.model.vo.Authority" alias="Authority"/>
+		<typeAlias type="com.kh.spring.survey.model.vo.Survey" alias="Survey"/>
+		<typeAlias type="com.kh.spring.approval.model.vo.Approval" alias="Approval"/>
+		<typeAlias type="com.kh.spring.admin.model.vo.AdminMenu" alias="AdminMenu"/>
+		<typeAlias type="com.kh.spring.meetingroom.model.vo.Meetingroom" alias="MRoom"/>
+		<typeAlias type="com.kh.spring.meetingroom.model.vo.Reservation" alias="Reservation"/>
+		<typeAlias type="com.kh.spring.productInOut.model.vo.Client" alias="Client"/>
+		<typeAlias type="com.kh.spring.productInOut.model.vo.Product" alias="Product"/>
+		<typeAlias type="com.kh.spring.productInOut.model.vo.Inout" alias="Inout"/>
+		<typeAlias type="com.kh.spring.mainCalendar.model.vo.Calendar" alias="Calendar"/>
+		<typeAlias type="com.kh.spring.mainCalendar.model.vo.Category" alias="Category"/>
+	    <typeAlias type="com.kh.spring.message.model.vo.Message" alias="Message"/>
+	    <typeAlias type="com.kh.spring.email.model.vo.Email" alias="Email"/>
+	    <typeAlias type="com.kh.spring.email.model.vo.EmailInfo" alias="EmailInfo"/>
+	</typeAliases>
+	
+	
+	<mappers>
+		<!--<mapper resource="/mappers/board-mapper.xml"/> -->
+		<mapper resource="/mappers/address-mapper.xml"/> 
+		<mapper resource="/mappers/todo-mapper.xml"/> 
+		<mapper resource="/mappers/employee-mapper.xml"/> 
+		<mapper resource="/mappers/notice-mapper.xml"/>
+		<mapper resource="/mappers/deptboard-mapper.xml"/>
+		<mapper resource="/mappers/community-mapper.xml"/>
+		<mapper resource="/mappers/work-mapper.xml"/>
+		<mapper resource="/mappers/admin-mapper.xml"/>
+		<mapper resource="/mappers/approval-mapper.xml"/>
+		<mapper resource="/mappers/meetingroom-mapper.xml"/>
+		<mapper resource="/mappers/productInout-mapper.xml"/>
+		<mapper resource="/mappers/calendar-mapper.xml"/>
+	    <mapper resource="/mappers/email-mapper.xml"/>
+	    <mapper resource="/mappers/message-mapper.xml"/>
+	</mappers>
+</configuration>

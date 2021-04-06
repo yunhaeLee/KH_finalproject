@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="approvalMapper">
+	<resultMap type="Approval" id="approvalResultMap">
+
+		<id property="approvalNo" column="APPROVAL_NO" />
+		<result property="approvalTitle" column="APPROVAL_TITLE" />
+		<result property="approvalContent" column="APPROVAL_CONTENT" />
+		<result property="approvalDate" column="APPROVAL_STARTDATE" />
+		<result property="urgent" column="URGENT" />
+		<result property="originalName" column="ORIGINNAME_APPROVAL" />
+		<result property="changeName" column="CHANGENAME_APPROVAL" />
+		<result property="status" column="APPROVAL_STATUS" />
+		<result property="firstDate" column="APPROVAL_FIRSTDATE" />
+		<result property="doneDate" column="APPROVAL_DONEDATE" />
+		<result property="empNo" column="EMP_NO" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="formNo" column="FORM_NO" />
+		<result property="formName" column="FORM_NAME" />  
+		<result property="firstApprEmp" column="FIRST_APPR_EMP" />
+		<result property="lastAppEmp" column="LAST_APPR_EMP" />
+		<result property="empPosition" column="JOB_NAME" />
+		<result property="deptName" column="DEPT_NAME" />
+	</resultMap>
+
+	<resultMap type="Employee" id="employeeResultSet">
+
+		<id property="empNo" column="EMP_NO" />
+		<result property="empPwd" column="EMP_PWD" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="phone" column="PHONE" />
+		<result property="address" column="ADDRESS" />
+		<result property="officePhone" column="OFFICE_PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="resNo" column="RES_NO" />
+		<result property="joinDate" column="JOIN_DATE" />
+		<result property="entDate" column="ENT_DATE" />
+		<result property="originName" column="ORIGIN_NAME" />
+		<result property="changeName" column="CHANGE_NAME" />
+		<result property="status" column="STATUS" />
+		<result property="deptCode" column="DEPT_CODE" />
+		<result property="jobCode" column="JOB_CODE" />
+		<result property="deptName" column="DEPT_NAME" />
+		<result property="empPosition" column="JOB_NAME" />
+		<result property="deptCode" column="DEPT_CODE" />
+		<result property="jobCode" column="JOB_CODE" />
+	</resultMap>
+
+
+<!-- 첫번째 결재자 불러오기  -->
+
+	<select id="selectfApprEmp" resultMap="employeeResultSet" 	parameterType="string">
+		SELECT EMP_NAME, EMP_NO,JOB_CODE, DEPT_CODE ,JOB_NAME,DEPT_NAME
+		FROM (SELECT * FROM EMPLOYEE
+		WHERE DEPT_CODE=#{deptCode} ORDER BY LENGTH(JOB_CODE) DESC, JOB_CODE DESC)
+		JOIN JOB USING (JOB_CODE)
+		JOIN DEPT USING (DEPT_CODE)
+		WHERE ROWNUM= 1
+
+	</select>
+
+
+<!-- 마지막결재자 불러오기  -->
+	<select id="selectlApprEmp" resultMap="employeeResultSet" >
+		SELECT EMP_NAME, EMP_NO, DEPT_CODE 
+		FROM EMPLOYEE  WHERE JOB_CODE='J10'
+		
+	</select>
+
+<!-- 처음 결재 올리기  -->
+	<insert id="insertApproval" parameterType="Approval">
+
+		INSERT INTO APPROVAL
+		VALUES(SEQ_APPROVAL.NEXTVAL,#{approvalTitle},#{approvalContent},SYSDATE,#{urgent},#{originalName},#{changeName}
+        ,#{status}
+		,#{firstDate}
+		,#{doneDate},#{empNo},#{formNo},#{firstApprEmp},#{lastAppEmp})
+
+
+	</insert>
+
+<!-- 결재올린자가 진행중이 문서가 보임 status 상관없이 모두 끌어옴  -->
+	<select id="selectyList" parameterType="Employee" resultMap="approvalResultMap">
+	  <![CDATA[  
+    	SELECT*
+		FROM (SELECT * FROM APPROVAL WHERE EMP_NO=#{empNo} ORDER BY APPROVAL_FIRSTDATE DESC) 
+		JOIN APPROVAL_TYPE USING (FORM_NO)
+		JOIN EMPLOYEE USING (EMP_NO)
+		WHERE ROWNUM <=10
+        ]]>   
+	</select>
+
+<!-- 첫번째 결재자의 결재함에 보임 모든 결재파일들이 올라옴 status는 상관없이 모두 끌어옴  -->
+	<select id="selectfaList" parameterType="Employee" resultMap="approvalResultMap">
+		SELECT*
+		FROM APPROVAL
+		JOIN APPROVAL_TYPE USING (FORM_NO)
+		JOIN EMPLOYEE USING (EMP_NO)
+		WHERE FIRST_APPR_EMP=#{empNo}
+
+	</select>
+	
+<!-- 마지막 결재자의 결재함에 보임 모든 결재파일들이 올라옴 status는 상관없이 모두 끌어옴  -->
+	<select id="selectclist"  parameterType="Employee" resultMap="approvalResultMap">
+	   <![CDATA[    
+		SELECT*
+		FROM APPROVAL
+		JOIN APPROVAL_TYPE USING (FORM_NO)
+		JOIN EMPLOYEE USING (EMP_NO)
+		WHERE LAST_APPR_EMP=#{empNo}
+       
+          ]]>
+	</select>
+
+
+<!-- detail 에서 첫번째 결재자의 정보를 끌어오기 위해 불러옴  -->
+	<select id="selectfApprEmpDetail" resultMap="employeeResultSet" parameterType="string">
+		SELECT *
+		FROM EMPLOYEE 
+		JOIN DEPT USING(DEPT_CODE) 
+		JOIN JOB USING(JOB_CODE)
+		WHERE EMP_NO=#{empNo}
+	</select>
+	
+	
+<!-- 결재 문서의 디테일 정보 불러오기  -->	
+	<select id="selectdetailapproval" parameterType="_int" 	resultMap="approvalResultMap">
+		SELECT *
+		FROM APPROVAL
+		JOIN EMPLOYEE USING (EMP_NO)
+		JOIN JOB USING (JOB_CODE)
+		JOIN DEPT USING (DEPT_CODE)
+		JOIN APPROVAL_TYPE USING (FORM_NO)
+		WHERE APPROVAL_NO=#{approvalNo}
+
+	</select>
+
+<update id="updateStatus" parameterType="_int"  >
+
+
+UPDATE APPROVAL
+SET APPROVAL_STATUS='A',
+APPROVAL_FIRSTDATE=SYSDATE
+WHERE APPROVAL_NO=#{approvalNo}
+
+</update>
+
+<update id="updateRStatus" parameterType="_int"  >
+
+
+UPDATE APPROVAL
+SET APPROVAL_STATUS='R'
+WHERE APPROVAL_NO=#{approvalNo}
+
+</update>
+
+<update id="updateCStatus" parameterType="_int"  >
+
+
+UPDATE APPROVAL
+SET APPROVAL_STATUS='C',
+APPROVAL_DONEDATE=SYSDATE
+WHERE APPROVAL_NO=#{approvalNo}
+
+</update>
+
+<update id="updateApproval" parameterType="Approval">
+UPDATE APPROVAL
+SET APPROVAL_TITLE=#{approvalTitle},
+APPROVAL_CONTENT=#{approvalContent},
+APPROVAL_STARTDATE=SYSDATE,
+URGENT=#{urgent},
+ORIGINNAME_APPROVAL=#{originalName},
+CHANGENAME_APPROVAL=#{changeName},
+FORM_NO=#{formNo},
+APPROVAL_STATUS=#{status}
+WHERE APPROVAL_NO=#{approvalNo}
+</update>
+
+<update id="deleteApproval" parameterType="_int"  >
+DELETE FROM APPROVAL
+WHERE APPROVAL_NO=#{approvalNo}
+</update>
+</mapper>
